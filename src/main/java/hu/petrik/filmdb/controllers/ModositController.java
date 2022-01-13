@@ -1,15 +1,17 @@
-package hu.petrik.filmdb;
+package hu.petrik.filmdb.controllers;
 
-import javafx.application.Platform;
+import hu.petrik.filmdb.Controller;
+import hu.petrik.filmdb.Film;
+import hu.petrik.filmdb.FilmDb;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 
 import java.sql.SQLException;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class HozzadController extends Controller {
+public class ModositController extends Controller {
     @FXML
     private TextField inputCim;
     @FXML
@@ -18,9 +20,10 @@ public class HozzadController extends Controller {
     private Spinner<Integer> inputHossz;
     @FXML
     private ChoiceBox<Integer> inputErtekeles;
+    private Film modositando;
 
     @FXML
-    public void onHozzadButtonClick(ActionEvent actionEvent) {
+    public void onModositButtonClick(ActionEvent actionEvent) {
         String cim = inputCim.getText().trim();
         String kategoria = inputKategoria.getText().trim();
         int hossz = 0;
@@ -39,7 +42,6 @@ public class HozzadController extends Controller {
             alert("A hossz megadása kötelező");
             return;
         } catch (Exception ex){
-            System.out.println(ex);
             alert("A hossz csak 1 és 999 közötti szám lehet");
             return;
         }
@@ -51,23 +53,39 @@ public class HozzadController extends Controller {
             alert("Értékelés kiválasztása köztelező");
             return;
         }
-        System.out.println(hossz);
         int ertekeles = inputErtekeles.getValue();
+
+        modositando.setCim(cim);
+        modositando.setKategoria(kategoria);
+        modositando.setErtekeles(ertekeles);
+        modositando.setHossz(hossz);
 
         try {
             FilmDb db = new FilmDb();
-            int siker = db.filmHozzaadasa(cim, kategoria, hossz, ertekeles);
-            if (siker == 1){
-                alert("Film hozzáadása sikeres");
+            if (db.filmModositasa(modositando)){
+                alertWait("Sikeres módosítás");
+                this.stage.close();
             } else {
-                alert("Film hozzáadása sikeretelen");
+                alert("Sikertelen módosítás");
             }
-        } catch (Exception e) {
-            hibaKiir(e);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
     }
 
+    public Film getModositando() {
+        return modositando;
+    }
 
+    public void setModositando(Film modositando) {
+        this.modositando = modositando;
+        ertekekBeallitasa();
+    }
 
+    private void ertekekBeallitasa() {
+        inputCim.setText(modositando.getCim());
+        inputKategoria.setText(modositando.getKategoria());
+        inputHossz.getValueFactory().setValue(modositando.getHossz());
+        inputErtekeles.setValue(modositando.getErtekeles());
+    }
 }

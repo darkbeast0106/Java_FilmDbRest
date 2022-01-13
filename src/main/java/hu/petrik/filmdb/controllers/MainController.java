@@ -1,5 +1,9 @@
-package hu.petrik.filmdb;
+package hu.petrik.filmdb.controllers;
 
+import hu.petrik.filmdb.Controller;
+import hu.petrik.filmdb.Film;
+import hu.petrik.filmdb.FilmApp;
+import hu.petrik.filmdb.FilmDb;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +22,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainController extends Controller{
+public class MainController extends Controller {
 
     @FXML
     private TableView<Film> filmTable;
@@ -48,6 +52,21 @@ public class MainController extends Controller{
 
     @FXML
     public void onModositasButtonClick(ActionEvent actionEvent) {
+        int selectedIndex = filmTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex == -1){
+            alert("A módosításhoz előbb válasszon ki egy elemet a táblázatból");
+            return;
+        }
+        Film modositando = filmTable.getSelectionModel().getSelectedItem();
+        try {
+            ModositController modositas = (ModositController) ujAblak("modosit-view.fxml",
+                    "Film módosítása", 320, 400);
+            modositas.setModositando(modositando);
+            modositas.getStage().setOnHiding(event -> filmTable.refresh());
+            modositas.getStage().show();
+        } catch (IOException e) {
+            hibaKiir(e);
+        }
     }
 
     @FXML
@@ -73,13 +92,10 @@ public class MainController extends Controller{
     @FXML
     public void onHozzadasButtonClick(ActionEvent actionEvent) {
         try {
-            Stage stage = new Stage();
-            FXMLLoader fxmlLoader = new FXMLLoader(FilmApp.class.getResource("hozzaad-view.fxml"));
-            Scene scene = new Scene(fxmlLoader.load(), 320, 400);
-            stage.setTitle("FilmDb");
-            stage.setScene(scene);
-            stage.setOnCloseRequest(event -> filmListaFeltolt());
-            stage.show();
+            Controller hozzadas = ujAblak("hozzaad-view.fxml", "Film hozzáadása",
+                    320, 400);
+            hozzadas.getStage().setOnCloseRequest(event -> filmListaFeltolt());
+            hozzadas.getStage().show();
         } catch (Exception e) {
             hibaKiir(e);
         }
