@@ -1,15 +1,13 @@
 package hu.petrik.filmdb.controllers;
 
 import hu.petrik.filmdb.Controller;
-import hu.petrik.filmdb.FilmDb;
-import javafx.application.Platform;
+import hu.petrik.filmdb.Film;
+import hu.petrik.filmdb.FilmApi;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-
-import java.sql.SQLException;
-import java.util.Timer;
-import java.util.TimerTask;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
 
 public class HozzadController extends Controller {
     @FXML
@@ -55,9 +53,9 @@ public class HozzadController extends Controller {
         int ertekeles = inputErtekeles.getValue();
 
         try {
-            FilmDb db = new FilmDb();
-            int siker = db.filmHozzaadasa(cim, kategoria, hossz, ertekeles);
-            if (siker == 1){
+            Film ujFilm = new Film(0, cim, kategoria, hossz, ertekeles);
+            Film letrehozott = FilmApi.filmHozzaadasa(ujFilm);
+            if (letrehozott != null){
                 alert("Film hozzáadása sikeres");
             } else {
                 alert("Film hozzáadása sikeretelen");
